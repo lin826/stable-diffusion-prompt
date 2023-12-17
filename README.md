@@ -1,8 +1,10 @@
 # Enhancing Stable Video Diffusion Prompts
 
+![overview gif](cheetah.gif) 
+
 ## Prerequirement
 
-Python 3.12.0
+Python 3.10.0
 
 ### PyTorch
 
