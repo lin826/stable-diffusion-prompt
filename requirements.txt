@@ -2,5 +2,6 @@ diffusers==0.24.0
 moviepy==1.0.3
 nltk==3.8.1
 spacy==3.7.2
+opencv-python
 transformers
 Pillow
