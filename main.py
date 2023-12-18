@@ -1,9 +1,8 @@
-import numpy as np
-import spacy
 import nltk
+import spacy
+import torch
 from nltk.corpus import stopwords
 from spacy.lang.en import English
-import torch
 from diffusers import AutoPipelineForText2Image
 from diffusers import DiffusionPipeline
 from diffusers.utils import export_to_video
@@ -12,6 +11,7 @@ from moviepy.editor import VideoFileClip
 
 sp = spacy.load("en_core_web_sm")
 nltk.download('stopwords')
+stop_words = set(stopwords.words('english'))
 
 pipeline_text2image = AutoPipelineForText2Image.from_pretrained("stabilityai/sdxl-turbo")
 pipeline_image2video = DiffusionPipeline.from_pretrained("stabilityai/stable-video-diffusion-img2vid-xt")
