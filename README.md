@@ -15,6 +15,7 @@ Based on individual OS environments, please download corresponding binary files:
 ```sh
 pip install -r requirements.txt
 python -m spacy download en_core_web_sm
+python -m nltk.downloader stopwords
 ```
 
 <!---
@@ -23,5 +24,7 @@ python -m spacy download en_core_web_sm
 ```sh
 conda env create -f requirement.yaml
 conda env list
+python -m spacy download en_core_web_sm
+python -m nltk.downloader stopwords
 ```
 --->
