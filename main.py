@@ -13,8 +13,8 @@ sp = spacy.load("en_core_web_sm")
 nltk.download('stopwords')
 stop_words = set(stopwords.words('english'))
 
-pipeline_text2image = AutoPipelineForText2Image.from_pretrained("stabilityai/sdxl-turbo")
-pipeline_image2video = DiffusionPipeline.from_pretrained("stabilityai/stable-video-diffusion-img2vid-xt")
+pipeline_text2image = AutoPipelineForText2Image.from_pretrained("stabilityai/sdxl-turbo").to("cuda")
+pipeline_image2video = DiffusionPipeline.from_pretrained("stabilityai/stable-video-diffusion-img2vid-xt").to("cuda")
 
 def split_sentences(text):
     # Load the English tokenizer from spaCy
@@ -93,18 +93,10 @@ def extract_patterns(sentence):
     return res
 
 def to_prompt(article):
-    prompt = []
     general_prompt = "best quality,ultra-detailed,masterpiece,hires,8k,"
     sentences = split_sentences(article)
-    seen = set()
-    for sentence in sentences:
-        for p in extract_patterns(sentence):
-            if p in seen:
-                continue
-            seen.add(p)
-            prompt.append(p)
-            
-    return general_prompt + ",".join(prompt)
+
+    return general_prompt + ",".join(set(map(extract_patterns, sentences)))
 
 
 if __name__ == '__main__':
