@@ -131,14 +131,16 @@ def generate_video(topic:str, pipeline_image2video):
 
 
 if __name__ == '__main__':
-    topic = 'cheetah'
-
-    # article = """
-    # In Africa's vast savannah, a swift cheetah races, epitomizing nature's splendor. Its effortless sprint highlights not just its remarkable speed but also the urgent need to protect these majestic creatures and their diminishing habitats.
-    # """
-    # pipeline_text2image = AutoPipelineForText2Image.from_pretrained("stabilityai/sdxl-turbo", torch_dtype=torch.float16).to("cuda")
-    # generate_image(article, topic, pipeline_text2image)
-
+    pipeline_text2image = AutoPipelineForText2Image.from_pretrained("stabilityai/sdxl-turbo", torch_dtype=torch.float16).to("cuda")
     pipeline_image2video = DiffusionPipeline.from_pretrained(
         "stabilityai/stable-video-diffusion-img2vid-xt", torch_dtype=torch.float16, variant="fp16").to("cuda")
-    generate_video(topic, pipeline_image2video)
+
+    experiments = {
+        'cheetah': """
+            In Africa's vast savannah, a swift cheetah races, epitomizing nature's splendor. Its effortless sprint highlights not just its remarkable speed but also the urgent need to protect these majestic creatures and their diminishing habitats.
+        """,
+    }
+
+    for topic, article in experiments:
+        generate_image(article, topic, pipeline_text2image)
+        generate_video(topic, pipeline_image2video)
