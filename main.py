@@ -141,6 +141,6 @@ if __name__ == '__main__':
         """,
     }
 
-    for topic, article in experiments:
+    for topic, article in experiments.items():
         generate_image(article, topic, pipeline_text2image)
         generate_video(topic, pipeline_image2video)
