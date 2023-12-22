@@ -2,6 +2,10 @@
 
 ![overview gif](cheetah.gif) 
 
+> Example article: `In Africa's vast savannah, a swift cheetah races, epitomizing nature's splendor. Its effortless sprint highlights not just its remarkable speed but also the urgent need to protect these majestic creatures and their diminishing habitats.`
+> 
+> Processed prompts: `best quality,ultra-detailed,masterpiece,hires,8k,In Africa,vast savannah,swift cheetah,races,epitomizing,nature,splendor,effortless,sprint,highlights,remarkable speed,also,urgent need,protect,majestic creatures,diminishing,habitats`
+
 ## Prerequirement
 
 Python 3.10.0
