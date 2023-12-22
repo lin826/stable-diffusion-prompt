@@ -9,14 +9,16 @@ from diffusers.utils import export_to_video
 from PIL import Image
 from moviepy.editor import VideoFileClip
 
+# Resize image to 1024x576
+IMAGE_WIDTH = 1024
+IMAGE_HEIGHT = 576
+
 sp = spacy.load("en_core_web_sm")
 nltk.download('stopwords')
 stop_words = set(stopwords.words('english'))
 
-pipeline_text2image = AutoPipelineForText2Image.from_pretrained("stabilityai/sdxl-turbo").to("cuda")
-pipeline_image2video = DiffusionPipeline.from_pretrained("stabilityai/stable-video-diffusion-img2vid-xt").to("cuda")
 
-def split_sentences(text):
+def split_sentences(text: str) -> [str]:
     # Load the English tokenizer from spaCy
     nlp = English()
     nlp.add_pipe('sentencizer')
@@ -29,7 +31,7 @@ def split_sentences(text):
 
     return sentences
 
-def extract_patterns(sentence):
+def extract_patterns(sentence: str) -> [str]:
     #keep the need words
     pos_needed = {"VERB", "ADJ", "ADV", "ADP", "NOUN", "NUM"}
     sentence_tags = []
@@ -92,32 +94,51 @@ def extract_patterns(sentence):
 
     return res
 
-def to_prompt(article):
+def to_prompt(article: str) -> str:
+    prompt = []
     general_prompt = "best quality,ultra-detailed,masterpiece,hires,8k,"
     sentences = split_sentences(article)
+    seen = set()
+    for sentence in sentences:
+        for p in extract_patterns(sentence):
+            if p in seen:
+                continue
+            seen.add(p)
+            prompt.append(p)
+            
+    return general_prompt + ",".join(prompt)
 
-    return general_prompt + ",".join(set(map(extract_patterns, sentences)))
-
-
-if __name__ == '__main__':
-    article = """
-    In Africa's vast savannah, a swift cheetah races, epitomizing nature's splendor. Its effortless sprint highlights not just its remarkable speed but also the urgent need to protect these majestic creatures and their diminishing habitats.
-    """
-
+def generate_image(article:str, topic:str, pipeline_text2image):
     prompt = to_prompt(article)
     print(prompt)
 
-    topic = "cheetah"
-    image = pipeline_text2image(prompt=prompt, guidance_scale=0.0, num_inference_steps=10, height=576, width=1024).images[0]
+    pipeline_text2image.enable_model_cpu_offload()
+    image = pipeline_text2image(prompt=prompt, guidance_scale=0.0, num_inference_steps=10, height=IMAGE_HEIGHT, width=IMAGE_WIDTH).images[0]
     image.save(f"{topic}.png")
 
+def generate_video(topic:str, pipeline_image2video):
     image = Image.open(f"{topic}.png")
-    image = image.resize((1024, 576))  # Resize image to 1024x576
-    # pipeline.enable_model_cpu_offload() #if you can use gpu
+    image = image.resize((IMAGE_WIDTH, IMAGE_HEIGHT))
     generator = torch.manual_seed(42)
+    # import ipdb; ipdb.set_trace()
+    pipeline_image2video.enable_model_cpu_offload() #if you can use gpu
     frames = pipeline_image2video(image, decode_chunk_size=8, generator=generator).frames[0]
 
     export_to_video(frames, f"{topic}.mp4", fps=7)
     
     video = VideoFileClip(f"{topic}.mp4")
     video.write_gif(f"{topic}.gif")
+
+
+if __name__ == '__main__':
+    topic = 'cheetah'
+
+    # article = """
+    # In Africa's vast savannah, a swift cheetah races, epitomizing nature's splendor. Its effortless sprint highlights not just its remarkable speed but also the urgent need to protect these majestic creatures and their diminishing habitats.
+    # """
+    # pipeline_text2image = AutoPipelineForText2Image.from_pretrained("stabilityai/sdxl-turbo", torch_dtype=torch.float16).to("cuda")
+    # generate_image(article, topic, pipeline_text2image)
+
+    pipeline_image2video = DiffusionPipeline.from_pretrained(
+        "stabilityai/stable-video-diffusion-img2vid-xt", torch_dtype=torch.float16, variant="fp16").to("cuda")
+    generate_video(topic, pipeline_image2video)
