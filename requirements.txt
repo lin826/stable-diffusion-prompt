@@ -6,4 +6,5 @@ accelerate
 chardet
 opencv-python
 transformers
+tqdm
 Pillow
